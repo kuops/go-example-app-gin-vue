@@ -123,6 +123,8 @@ export default {
           width: 40px;
           height: 40px;
           border-radius: 10px;
+          border: 1px solid white;
+          box-shadow: 2px 2px #888888;
         }
 
         .el-icon-caret-bottom {

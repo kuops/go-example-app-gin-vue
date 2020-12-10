@@ -14,6 +14,8 @@ const state = getDefaultState()
 
 const mutations = {
   RESET_STATE: (state) => {
+    // Object.assign 方法用于对象的合并，将源对象（source）的所有可枚举属性，复制到目标对象
+    // Object.assign 方法的第一个参数是目标对象，后面的参数都是源对象。
     Object.assign(state, getDefaultState())
   },
   SET_TOKEN: (state, token) => {

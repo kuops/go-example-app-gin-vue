@@ -106,6 +106,31 @@ export const constantRoutes = [
   },
 
   {
+    path: '/cluster',
+    component: Layout,
+    redirect: '/cluster/namespaces',
+    name: '集群状态',
+    meta: {
+      title: '集群状态',
+      icon: 'cluster'
+    },
+    children: [
+      {
+        path: 'namespaces',
+        component: () => import('@/views/cluster/namespaces/index'),
+        name: '命名空间',
+        meta: { title: '命名空间' }
+      },
+      {
+        path: 'menu2',
+        component: () => import('@/views/nested/menu2/index'),
+        name: 'Menu2',
+        meta: { title: 'menu2' }
+      }
+    ]
+  },
+
+  {
     path: '/nested',
     component: Layout,
     redirect: '/nested/menu1',

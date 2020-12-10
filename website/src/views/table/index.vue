@@ -71,6 +71,7 @@ export default {
       this.listLoading = true
       getList().then(response => {
         this.list = response.data.items
+        console.log(this.list)
         this.listLoading = false
       })
     }

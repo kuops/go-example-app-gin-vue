@@ -119,13 +119,13 @@ export const constantRoutes = [
         path: 'namespaces',
         component: () => import('@/views/cluster/namespaces/index'),
         name: '命名空间',
-        meta: { title: '命名空间' }
+        meta: { title: '命名空间',icon: 'el-icon-cloudy'}
       },
       {
-        path: 'menu2',
-        component: () => import('@/views/nested/menu2/index'),
-        name: 'Menu2',
-        meta: { title: 'menu2' }
+        path: 'deployments',
+        component: () => import('@/views/cluster/deployments/index'),
+        name: 'Deployment',
+        meta: { title: 'Deployment',icon: 'guide'}
       }
     ]
   },

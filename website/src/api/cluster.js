@@ -15,10 +15,31 @@ export function createNamespace(data) {
   })
 }
 
-export function deleteNamespace(data) {
+export function deleteNamespace(name) {
   return request({
-    url: '/vue-admin-template/cluster/namespaces',
+    url: `/vue-admin-template/cluster/namespaces/${name}`,
     method: 'delete',
+  })
+}
+
+export function getDeployments() {
+  return request({
+    url: `/vue-admin-template/cluster/deployments`,
+    method: 'get',
+  })
+}
+
+export function getNamespaceDeployments(name) {
+  return request({
+    url: `/vue-admin-template/cluster/namespaces/${name}/deployments`,
+    method: 'get',
+  })
+}
+
+export function pathNamespaceDeployments(namespace,deployment,data) {
+  return request({
+    url: `/vue-admin-template/cluster/namespaces/${namespace}/deployments/${deployment}`,
+    method: 'patch',
     data
   })
 }

@@ -4,8 +4,11 @@ import (
 	"context"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"time"
@@ -115,10 +118,20 @@ func main() {
 		panic(err.Error())
 	}
 	clientset, err := kubernetes.NewForConfig(kubeconfig)
+	if err != nil {
+		panic(err)
+	}
+	client, err := dynamic.NewForConfig(kubeconfig)
+	if err != nil {
+		panic(err)
+	}
+
+	namespaceRes := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "namespaces"}
+	deploymentRes := schema.GroupVersionResource{Group: "apps", Version: "v1", Resource: "deployments"}
 
 
 	r.GET("api/v1/vue-admin-template/cluster/namespaces", func(c *gin.Context) {
-		namespaces, _ := clientset.CoreV1().Namespaces().List(context.TODO(),metav1.ListOptions{})
+		namespaces, _ := client.Resource(namespaceRes).List(context.TODO(),metav1.ListOptions{})
 		c.JSON(200, gin.H{
 			"code": 20000,
 			"data": namespaces,
@@ -161,14 +174,46 @@ func main() {
 		})
 	})
 
-	type DleteNameSpace struct {
-		Name string `json:"name"`
-	}
-	var deleteNS = DleteNameSpace{}
-	r.DELETE("api/v1/vue-admin-template/cluster/namespaces", func(c *gin.Context) {
-		err := c.ShouldBindJSON(&deleteNS)
+
+	r.DELETE("api/v1/vue-admin-template/cluster/namespaces/:name", func(c *gin.Context) {
+		name := c.Param("name")
+		if err := clientset.CoreV1().Namespaces().Delete(context.TODO(),name,metav1.DeleteOptions{});err != nil {
+				status  = "failed"
+				code = 20001
+		}
+		status = "success"
+		code = 20000
+		c.JSON(200, gin.H{
+			"code": code,
+			"data": map[string]string{
+				"state": status,
+			},
+		})
+	})
+
+	r.GET("api/v1/vue-admin-template/cluster/deployments", func(c *gin.Context) {
+		deployments, _ := client.Resource(deploymentRes).List(context.TODO(),metav1.ListOptions{})
+		c.JSON(200, gin.H{
+			"code": 20000,
+			"data": deployments,
+		})
+	})
+
+	r.GET("api/v1/vue-admin-template/cluster/namespaces/:namespace/deployments", func(c *gin.Context) {
+		namespace := c.Param("namespace")
+		deployments, _ := client.Resource(deploymentRes).Namespace(namespace).List(context.TODO(),metav1.ListOptions{})
+		c.JSON(200, gin.H{
+			"code": 20000,
+			"data": deployments,
+		})
+	})
+
+	r.PATCH("api/v1/vue-admin-template/cluster/namespaces/:namespace/deployments/:deployment", func(c *gin.Context) {
+		var namespace = c.Param("namespace")
+		var deployment = &appsv1.Deployment{}
+		err := c.ShouldBindJSON(deployment)
 		if err == nil {
-			if err := clientset.CoreV1().Namespaces().Delete(context.TODO(),deleteNS.Name,metav1.DeleteOptions{});err != nil {
+			if _,err := clientset.AppsV1().Deployments(namespace).Update(context.TODO(),deployment,metav1.UpdateOptions{});err != nil {
 				status  = "failed"
 				code = 20001
 			}
@@ -179,12 +224,12 @@ func main() {
 			code = 20002
 		}
 		c.JSON(200, gin.H{
-			"code": code,
-			"data": map[string]string{
-				"state": status,
-			},
+			"code": 20000,
+			"data": status,
 		})
 	})
+
+
 
 	r.Run(":8080")
 }

@@ -1,9 +1,13 @@
 <template>
   <div class="app-container">
-    <div class="create-namespace">
-          <el-input placeholder="请输入要创建的命名空间" v-model="namespaceObj.name"></el-input>
-          <el-button type="primary" @click="createNS">创建命名空间</el-button>
-    </div>
+    <el-form :inline="true">
+      <el-form-item>
+        <el-input placeholder="请输入要创建的命名空间" v-model="namespaceObj.name"></el-input>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="createNS">创建命名空间</el-button>
+      </el-form-item>
+    </el-form>
     <el-table
       v-loading="loading"
       :data="namespacesList"
@@ -40,7 +44,9 @@ export default {
   data() {
     return {
       loading: true,
-      namespaceObj: {},
+      namespaceObj: {
+        name: '',
+      },
       namespacesList: null,
     }
   },
@@ -57,18 +63,17 @@ export default {
     },
     createNS() {
       createNamespace(this.namespaceObj).then(response => {
-        console.log(response.code)
         if (response.code === 20000) {
           this.fetchData()
           this.$message.success("创建命名空间成功")
         } else  {
           this.$message.error("创建命名空间失败")
         }
+        this.namespaceObj.name = ''
         })
     },
     deleteNS(name) {
-      const deleteObj = Object.assign({},{name:name})
-      deleteNamespace(deleteObj).then(response => {
+      deleteNamespace(name).then(response => {
         this.fetchData()
         }
       )
@@ -78,14 +83,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.el-button {
-  padding: 10px 15px;
-}
-.create-namespace {
-  margin-bottom: 15px;
-}
 .el-input {
   width: 200px;
-  margin-right: 10px;
+}
+.el-button {
+  padding: 10px 15px;
 }
 </style>

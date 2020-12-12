@@ -5,7 +5,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	appsv1 "k8s.io/api/apps/v1"
-	v1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
@@ -138,11 +138,11 @@ func main() {
 		})
 	})
 
-	var Namespace = &v1.Namespace{
+	var Namespace = &corev1.Namespace{
 		TypeMeta:   metav1.TypeMeta{},
 		ObjectMeta: metav1.ObjectMeta{},
-		Spec:       v1.NamespaceSpec{},
-		Status:     v1.NamespaceStatus{},
+		Spec:       corev1.NamespaceSpec{},
+		Status:     corev1.NamespaceStatus{},
 	}
 
 	type CreateNameSpace struct {
@@ -175,8 +175,8 @@ func main() {
 	})
 
 
-	r.DELETE("api/v1/vue-admin-template/cluster/namespaces/:name", func(c *gin.Context) {
-		name := c.Param("name")
+	r.DELETE("api/v1/vue-admin-template/cluster/namespaces/:namespace", func(c *gin.Context) {
+		name := c.Param("namespace")
 		if err := clientset.CoreV1().Namespaces().Delete(context.TODO(),name,metav1.DeleteOptions{});err != nil {
 				status  = "failed"
 				code = 20001
@@ -229,7 +229,21 @@ func main() {
 		})
 	})
 
-
+	r.DELETE("api/v1/vue-admin-template/cluster/namespaces/:namespace/deployments/:deployment", func(c *gin.Context) {
+		var namespace = c.Param("namespace")
+		var deployment = c.Param("deployment")
+		if err := clientset.AppsV1().Deployments(namespace).Delete(context.TODO(),deployment,metav1.DeleteOptions{});err != nil {
+			status  = "failed"
+			code = 20001
+		} else {
+			status = "success"
+			code = 20000
+		}
+		c.JSON(200, gin.H{
+			"code": 20000,
+			"data": status,
+		})
+	})
 
 	r.Run(":8080")
 }

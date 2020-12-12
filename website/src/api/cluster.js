@@ -43,3 +43,10 @@ export function pathNamespaceDeployments(namespace,deployment,data) {
     data
   })
 }
+
+export function deleteNamespaceDeployment(namespace,deployment) {
+  return request({
+    url: `/vue-admin-template/cluster/namespaces/${namespace}/deployments/${deployment}`,
+    method: 'delete',
+  })
+}

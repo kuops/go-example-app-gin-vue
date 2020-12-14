@@ -22,7 +22,7 @@ cd vue-admin-template
 npm install
 
 # develop
-npm run dev
+npm app dev
 ```
 
 This will automatically open http://localhost:9528
@@ -31,26 +31,26 @@ This will automatically open http://localhost:9528
 
 ```bash
 # build for test environment
-npm run build:stage
+npm app build:stage
 
 # build for production environment
-npm run build:prod
+npm app build:prod
 ```
 
 ## Advanced
 
 ```bash
 # preview the release environment effect
-npm run preview
+npm app preview
 
 # preview the release environment effect + static resource analysis
-npm run preview -- --report
+npm app preview -- --report
 
 # code format check
-npm run lint
+npm app lint
 
 # code format check and auto fix
-npm run lint -- --fix
+npm app lint -- --fix
 ```
 
 Refer to [Documentation](https://panjiachen.github.io/vue-element-admin-site/guide/essentials/deploy.html) for more information

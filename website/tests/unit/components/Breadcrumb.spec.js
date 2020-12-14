@@ -76,7 +76,7 @@ describe('Breadcrumb.vue', () => {
     expect(len).toBe(3)
   })
   // it('click link', () => {
-  //   router.push('/menu/menu1/menu1-2/menu1-2-2')
+  //   routers.push('/menu/menu1/menu1-2/menu1-2-2')
   //   const breadcrumbArray = wrapper.findAll('.el-breadcrumb__inner')
   //   const second = breadcrumbArray.at(1)
   //   console.log(breadcrumbArray)
@@ -84,7 +84,7 @@ describe('Breadcrumb.vue', () => {
   //   expect(href).toBe('#/menu/menu1')
   // })
   // it('noRedirect', () => {
-  //   router.push('/menu/menu1/menu1-2/menu1-2-1')
+  //   routers.push('/menu/menu1/menu1-2/menu1-2-1')
   //   const breadcrumbArray = wrapper.findAll('.el-breadcrumb__inner')
   //   const redirectBreadcrumb = breadcrumbArray.at(2)
   //   expect(redirectBreadcrumb.contains('a')).toBe(false)

@@ -1,0 +1,27 @@
+version: '3.3'
+
+services:
+  mysql:
+    image: mysql:8.0
+    ports:
+      - 3306:3306
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: demo
+  redis:
+    image: redis:5.0
+    ports:
+      - 6379:6379
+    volumes:
+      - redis_data:/data
+    restart: always
+    environment:
+      REDIS_PASSWORD: 123456
+    command: ["bash", "-c",'docker-entrypoint.sh --requirepass "$${REDIS_PASSWORD}"']
+
+volumes:
+  mysql_data: {}
+  redis_data: {}

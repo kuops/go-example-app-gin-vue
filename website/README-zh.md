@@ -46,7 +46,7 @@ npm install
 npm install --registry=https://registry.npm.taobao.org
 
 # 启动服务
-npm run dev
+npm app dev
 ```
 
 浏览器访问 [http://localhost:9528](http://localhost:9528)
@@ -55,26 +55,26 @@ npm run dev
 
 ```bash
 # 构建测试环境
-npm run build:stage
+npm app build:stage
 
 # 构建生产环境
-npm run build:prod
+npm app build:prod
 ```
 
 ## 其它
 
 ```bash
 # 预览发布环境效果
-npm run preview
+npm app preview
 
 # 预览发布环境效果 + 静态资源分析
-npm run preview -- --report
+npm app preview -- --report
 
 # 代码格式检查
-npm run lint
+npm app lint
 
 # 代码格式检查并自动修复
-npm run lint -- --fix
+npm app lint -- --fix
 ```
 
 更多信息请参考 [使用文档](https://panjiachen.github.io/vue-element-admin-site/zh/)

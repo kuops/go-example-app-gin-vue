@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"github.com/kuops/go-example-app/server/pkg/config"
 	"github.com/kuops/go-example-app/server/pkg/log"
 	"github.com/kuops/go-example-app/server/pkg/server"
@@ -14,7 +13,6 @@ import (
 var cfgFile string
 
 func init()  {
-	gin.SetMode(gin.ReleaseMode)
 	log.InitLogger()
 }
 

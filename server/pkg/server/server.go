@@ -24,6 +24,7 @@ type Server struct {
 }
 
 func (s *Server) PrepareRun() error {
+	s.setMode()
 	s.installRouters()
 	log.Infof("注册路由成功...")
 	return nil
@@ -71,4 +72,12 @@ func (s *Server) installRouters() {
 	userv1.Register(v1Group, s.MySQLClient)
 
 	s.Server.Handler = router
+}
+
+func (s *Server)setMode()  {
+	if s.ServerConfig.Debug {
+		gin.SetMode(gin.DebugMode)
+	} else {
+		gin.SetMode(gin.ReleaseMode)
+	}
 }

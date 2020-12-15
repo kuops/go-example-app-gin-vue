@@ -1,11 +1,11 @@
 server:
   port: 8080
-  debug: false
+  debug: true
 
 redis:
   host: 127.0.0.1
   port: 6379
-  password: 654321
+  password: 123456
 
 mysql:
   host: 127.0.0.1

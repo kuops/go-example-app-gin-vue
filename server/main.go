@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/kuops/go-example-app/server/cmd"
+	_ "github.com/kuops/go-example-app/server/docs"
 	"os"
 )
 
@@ -17,8 +18,8 @@ import (
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host petstore.swagger.io
-// @BasePath /v1
+// @host localhost:8080
+// @BasePath /
 func main() {
 	command := cmd.NewServerCommand()
 	if err := command.Execute(); err != nil {

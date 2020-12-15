@@ -6,6 +6,7 @@ import (
 	"github.com/kuops/go-example-app/server/pkg/log"
 	"github.com/kuops/go-example-app/server/pkg/server"
 	"github.com/kuops/go-example-app/server/pkg/store/mysql"
+	"github.com/kuops/go-example-app/server/pkg/store/redis"
 	"github.com/spf13/cobra"
 	"net/http"
 )
@@ -45,12 +46,16 @@ func NewServer(config *config.Config,stopCh <-chan struct{}) (*server.Server, er
 	}
 
 	mysqlClient,err := mysql.NewMySQLClient(&config.Mysql,stopCh)
-
 	if err != nil {
 		return nil, err
 	}
-
 	s.MySQLClient = mysqlClient
+
+	redisClient,err := redis.NewRedisClient(&config.Redis,stopCh)
+	if err != nil {
+		return nil, err
+	}
+	s.RedisClient = redisClient
 
 	return s, nil
 }

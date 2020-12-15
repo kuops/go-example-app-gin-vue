@@ -5,6 +5,7 @@ import (
 	"github.com/kuops/go-example-app/server/pkg/config"
 	"github.com/kuops/go-example-app/server/pkg/log"
 	"gorm.io/driver/mysql"
+	"moul.io/zapgorm2"
 	"time"
 )
 import "gorm.io/gorm"
@@ -19,7 +20,7 @@ type Client struct {
 
 func NewMySQLClient(cfg *config.MySQLConfig,stopCh <-chan struct{}) (*Client, error) {
 	var client Client
-
+	var logger = zapgorm2.New(log.Logger)
 	dsn := fmt.Sprintf("%v:%v@tcp(%v:%v)/demo?charset=utf8mb4&parseTime=True&loc=Local",
 		cfg.Username,
 		cfg.Password,
@@ -30,7 +31,7 @@ func NewMySQLClient(cfg *config.MySQLConfig,stopCh <-chan struct{}) (*Client, er
 		DefaultStringSize: 256,
 	}
 
-	if db, err := gorm.Open(mysql.New(mysqlConfig), &gorm.Config{}); err != nil {
+	if db, err := gorm.Open(mysql.New(mysqlConfig), &gorm.Config{Logger: logger}); err != nil {
 		log.Errorf("database connection error: %v\n",err)
 	} else {
 		sqlDB, _ := db.DB()

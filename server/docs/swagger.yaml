@@ -1,5 +1,15 @@
-basePath: /v1
-host: petstore.swagger.io
+basePath: /
+definitions:
+  request.Login:
+    properties:
+      password:
+        example: "123456"
+        type: string
+      username:
+        example: admin
+        type: string
+    type: object
+host: localhost:8080
 info:
   contact:
     email: support@swagger.io
@@ -12,5 +22,36 @@ info:
   termsOfService: http://swagger.io/terms/
   title: Swagger Example API
   version: "1.0"
-paths: {}
+paths:
+  /api/v1/user/login:
+    post:
+      parameters:
+      - description: 用户登录接口
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.Login'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"登陆成功"}'
+          schema:
+            type: string
+      summary: 用户登录
+      tags:
+      - 用户
+  /api/v1/user/logout:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"退出成功"}'
+          schema:
+            type: string
+      summary: 用户退出
+      tags:
+      - 用户
 swagger: "2.0"

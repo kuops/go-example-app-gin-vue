@@ -3,14 +3,16 @@ package server
 import (
 	"context"
 	"github.com/gin-gonic/gin"
-	_ "github.com/kuops/go-example-app/server/docs"
 	"github.com/kuops/go-example-app/server/pkg/apis/metrics"
 	userv1 "github.com/kuops/go-example-app/server/pkg/apis/user/v1"
 	"github.com/kuops/go-example-app/server/pkg/config"
+	dbinit "github.com/kuops/go-example-app/server/pkg/db/initialize"
 	"github.com/kuops/go-example-app/server/pkg/log"
+	"github.com/kuops/go-example-app/server/pkg/middleware/auth"
 	"github.com/kuops/go-example-app/server/pkg/middleware/cors"
 	"github.com/kuops/go-example-app/server/pkg/middleware/prometheus"
 	"github.com/kuops/go-example-app/server/pkg/store/mysql"
+	"github.com/kuops/go-example-app/server/pkg/store/redis"
 	"github.com/kuops/go-example-app/server/pkg/utils/ip"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -21,11 +23,20 @@ type Server struct {
 	Server       *http.Server
 	ServerConfig *config.ServerConfig
 	MySQLClient  *mysql.Client
+	RedisClient  redis.Interface
 }
 
 func (s *Server) PrepareRun() error {
 	s.setMode()
 	s.installRouters()
+	if err := s.Migration();err != nil {
+		return err
+	}
+
+	if err := s.InitialDatabase();err != nil {
+		return err
+	}
+
 	log.Infof("注册路由成功...")
 	return nil
 }
@@ -59,17 +70,19 @@ func (s *Server) Run(stopCh <-chan struct{}) error {
 func (s *Server) installRouters() {
 	router := gin.New()
 
+	skipAuthUri := []string{"/api/v1/user/login"}
 	router.Use(cors.Middleware())
+	router.Use(auth.Middleware(s.RedisClient,skipAuthUri))
 	router.Use(prometheus.PromMiddleware(&prometheus.PromOpts{}))
 
 	url := ginSwagger.URL("http://localhost:8080/swagger/doc.json") // The url pointing to API definition
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 
 	rootGroup := router.Group("")
-	v1Group := router.Group("api/v1")
+	apiv1Group := router.Group("api/v1")
 
 	metrics.Register(rootGroup)
-	userv1.Register(v1Group, s.MySQLClient)
+	userv1.Register(apiv1Group, s.MySQLClient,s.RedisClient)
 
 	s.Server.Handler = router
 }
@@ -80,4 +93,19 @@ func (s *Server)setMode()  {
 	} else {
 		gin.SetMode(gin.ReleaseMode)
 	}
+}
+
+func (s *Server)Migration() error {
+	log.Info("初始化数据库表结构....")
+	return s.MySQLClient.Database().DB.AutoMigrate(userv1.User{})
+}
+
+func (s *Server)InitialDatabase() error {
+	var err error
+	log.Info("初始化数据库系统数据...")
+
+	if err = dbinit.InitialSysUser(s.MySQLClient); err != nil {
+		return err
+	}
+	return nil
 }

@@ -7,6 +7,7 @@ import (
 	"os"
 )
 
+var Logger *zap.Logger
 var sugaredLogger *zap.SugaredLogger
 
 func InitLogger() {
@@ -23,7 +24,6 @@ func InitLogger() {
 		MaxAge:     7, // days
 	})
 	stdout := zapcore.AddSync(os.Stdout)
-	stderr := zapcore.AddSync(os.Stderr)
 	config := newConfig()
 
 	core := zapcore.NewTee(
@@ -33,13 +33,14 @@ func InitLogger() {
 			zap.InfoLevel,
 		),
 		zapcore.NewCore(
-			zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
-			zapcore.NewMultiWriteSyncer(errLog, stderr),
+			zapcore.NewJSONEncoder(*config),
+			zapcore.NewMultiWriteSyncer(errLog),
 			zap.ErrorLevel,
 		),
 	)
 	caller := zap.AddCaller()
-	sugaredLogger = zap.New(core,caller,zap.AddCallerSkip(1)).Sugar()
+	Logger = zap.New(core,caller,zap.AddCallerSkip(1))
+	sugaredLogger = Logger.Sugar()
 }
 
 func newConfig() *zapcore.EncoderConfig {

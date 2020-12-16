@@ -9,7 +9,7 @@ type Role struct {
 	UpdatedAt   time.Time `json:"updated_at"`
 	CreatedBy   uint64 `json:"created_by" gorm:"column:created_by;default:0;not null;comment:创建者"`
 	UpdatedBy   uint64 `json:"updated_by" gorm:"column:updated_by;default:0;not null;comment:修改者"`
-	Comment     string `json:"comment" gorm:"column:memo;size:64;comment:备注"`
+	Comment     string `json:"comment" gorm:"column:comment;size:64;comment:备注"`
 	Name     string `json:"name" gorm:"column:name;size:32;not null;comment:名称"`
 	Sequence int    `json:"sequence" gorm:"column:sequence;not null;comment:排序值"`
 	ParentID uint64 `json:"parent_id" gorm:"column:parent_id;not null;comment:父级ID" `

@@ -3,6 +3,7 @@ module github.com/kuops/go-example-app
 go 1.15
 
 require (
+	github.com/ahmetb/go-linq v3.0.0+incompatible
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/casbin/casbin/v2 v2.19.4
 	github.com/casbin/gorm-adapter/v3 v3.0.4

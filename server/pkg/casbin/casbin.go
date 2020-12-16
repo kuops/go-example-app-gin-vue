@@ -97,6 +97,7 @@ func setRolePermission(enforcer *casbin.Enforcer, roleid uint64) {
 		return
 	}
 	_,_ = enforcer.AddPermissionForUser(convert.ToString(roleid), "/api/v1/user/info","GET|POST|UPDATE|DELETE")
+	_,_ = 	enforcer.AddPermissionForUser(convert.ToString(roleid), "/api/v1/user/changePassword","GET|POST|UPDATE|DELETE")
 	for _, roleMenu := range roleMenus {
 		menu := menuv1.Menu{}
 		where := menuv1.Menu{}

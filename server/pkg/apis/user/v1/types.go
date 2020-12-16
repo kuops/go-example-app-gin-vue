@@ -2,6 +2,8 @@ package v1
 
 import "time"
 
+const adminID uint64 = 1
+
 type User struct {
 	ID          uint64 `json:"id" gorm:"primarykey"`
 	CreatedAt   time.Time `json:"created_at"`

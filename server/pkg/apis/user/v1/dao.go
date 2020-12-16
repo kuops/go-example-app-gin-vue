@@ -15,3 +15,10 @@ func (s *dao)Login(u *User) (*User,error){
 	err := s.db.Where("user_name = ? AND password = ?", u.UserName, u.Password).First(&user).Error
 	return &user,err
 }
+
+func (s *dao)Info(u *User) (*User,error){
+	var user User
+	err := s.db.Where("id = ? AND user_name = ?", u.ID, u.UserName).First(&user).Error
+	return &user,err
+}
+

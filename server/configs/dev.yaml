@@ -12,6 +12,7 @@ mysql:
   port: 3306
   username: root
   password: 123456
+  database: demo
 
 kubernetes:
   # type in or out cluster type

@@ -23,6 +23,20 @@ info:
   title: Swagger Example API
   version: "1.0"
 paths:
+  /api/v1/user/info:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"登录成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 用户信息
+      tags:
+      - 用户
   /api/v1/user/login:
     post:
       parameters:

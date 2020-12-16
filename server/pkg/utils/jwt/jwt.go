@@ -9,7 +9,7 @@ var  jwtSignKey = []byte("qwerasdf")
 var  TokenExpired = errors.New("token expired")
 
 type CustomClaims struct {
-	ID uint
+	ID uint64
 	UUID string
 	Name string
 	jwt.StandardClaims

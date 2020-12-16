@@ -5,12 +5,15 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/kuops/go-example-app/server/pkg/apis/metrics"
 	userv1 "github.com/kuops/go-example-app/server/pkg/apis/user/v1"
+	"github.com/kuops/go-example-app/server/pkg/casbin"
 	"github.com/kuops/go-example-app/server/pkg/config"
 	dbinit "github.com/kuops/go-example-app/server/pkg/db/initialize"
 	"github.com/kuops/go-example-app/server/pkg/log"
 	"github.com/kuops/go-example-app/server/pkg/middleware/auth"
 	"github.com/kuops/go-example-app/server/pkg/middleware/cors"
+	"github.com/kuops/go-example-app/server/pkg/middleware/logger"
 	"github.com/kuops/go-example-app/server/pkg/middleware/prometheus"
+	casbinmw "github.com/kuops/go-example-app/server/pkg/middleware/casbin"
 	"github.com/kuops/go-example-app/server/pkg/store/mysql"
 	"github.com/kuops/go-example-app/server/pkg/store/redis"
 	"github.com/kuops/go-example-app/server/pkg/utils/ip"
@@ -28,16 +31,12 @@ type Server struct {
 
 func (s *Server) PrepareRun() error {
 	s.setMode()
+	s.Migration()
+	s.InitialDatas()
+	s.InitCsbinEnforcer()
 	s.installRouters()
-	if err := s.Migration();err != nil {
-		return err
-	}
 
-	if err := s.InitialDatabase();err != nil {
-		return err
-	}
 
-	log.Infof("注册路由成功...")
 	return nil
 }
 
@@ -70,10 +69,23 @@ func (s *Server) Run(stopCh <-chan struct{}) error {
 func (s *Server) installRouters() {
 	router := gin.New()
 
-	skipAuthUri := []string{"/api/v1/user/login","/swagger"}
-	router.Use(cors.Middleware())
-	router.Use(auth.Middleware(s.RedisClient,skipAuthUri))
-	router.Use(prometheus.PromMiddleware(&prometheus.PromOpts{}))
+	skipAuthUri := []string{
+		"/api/v1/user/login",
+		"/swagger",
+		"/metrics",
+	}
+
+	middlewares := []gin.HandlerFunc {
+		logger.GinLogger(),
+		logger.GinRecovery(),
+		cors.Middleware(),
+		auth.Middleware(s.RedisClient,skipAuthUri),
+		prometheus.PromMiddleware(&prometheus.PromOpts{}),
+		casbinmw.Middleware(skipAuthUri),
+	}
+
+	router.Use(middlewares...)
+
 
 	url := ginSwagger.URL("http://localhost:8080/swagger/doc.json") // The url pointing to API definition
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
@@ -85,6 +97,7 @@ func (s *Server) installRouters() {
 	userv1.Register(apiv1Group, s.MySQLClient,s.RedisClient)
 
 	s.Server.Handler = router
+	log.Info("注册路由成功...")
 }
 
 func (s *Server)setMode()  {
@@ -95,17 +108,17 @@ func (s *Server)setMode()  {
 	}
 }
 
-func (s *Server)Migration() error {
+func (s *Server)Migration() {
 	log.Info("初始化数据库表结构....")
-	return s.MySQLClient.Database().DB.AutoMigrate(userv1.User{})
+	dbinit.Migration(s.MySQLClient)
 }
 
-func (s *Server)InitialDatabase() error {
-	var err error
+func (s *Server)InitialDatas()  {
 	log.Info("初始化数据库系统数据...")
+	dbinit.InitialDatas(s.MySQLClient)
+}
 
-	if err = dbinit.InitialSysUser(s.MySQLClient); err != nil {
-		return err
-	}
-	return nil
+func (s *Server)InitCsbinEnforcer()  {
+	log.Info("初始化权限系统...")
+	casbin.InitCsbinEnforcer(s.MySQLClient)
 }

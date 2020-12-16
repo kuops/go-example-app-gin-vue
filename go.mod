@@ -4,9 +4,11 @@ go 1.15
 
 require (
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
-	github.com/casbin/casbin v1.9.1
+	github.com/casbin/casbin/v2 v2.19.4
+	github.com/casbin/gorm-adapter/v3 v3.0.4
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-contrib/cors v1.3.1
+	github.com/gin-contrib/zap v0.0.1
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/onsi/ginkgo v1.14.2 // indirect

@@ -16,16 +16,18 @@ type Database struct {
 
 type Client struct {
 	database *Database
+	Config  *config.MySQLConfig
 }
 
 func NewMySQLClient(cfg *config.MySQLConfig,stopCh <-chan struct{}) (*Client, error) {
 	var client Client
 	var logger = zapgorm2.New(log.Logger)
-	dsn := fmt.Sprintf("%v:%v@tcp(%v:%v)/demo?charset=utf8mb4&parseTime=True&loc=Local",
+	dsn := fmt.Sprintf("%v:%v@tcp(%v:%v)/%v?charset=utf8mb4&parseTime=True&loc=Local",
 		cfg.Username,
 		cfg.Password,
 		cfg.Host,
-		cfg.Port)
+		cfg.Port,
+		cfg.Database)
 	mysqlConfig := mysql.Config{
 		DSN:               dsn,
 		DefaultStringSize: 256,
@@ -39,6 +41,7 @@ func NewMySQLClient(cfg *config.MySQLConfig,stopCh <-chan struct{}) (*Client, er
 		sqlDB.SetMaxOpenConns(50)
 		sqlDB.SetConnMaxLifetime(time.Second * 300)
 
+		client.Config = cfg
 		client.database = &Database{
 			DB: db,
 		}

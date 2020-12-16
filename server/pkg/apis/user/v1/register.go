@@ -14,5 +14,6 @@ func Register(group *gin.RouterGroup,mysqlClient *mysql.Client,redisClient redis
 	rg := group.Group(groupName)
 	rg.POST("/login", handler.Login)
 	rg.POST("/logout",handler.Logout)
+	rg.GET("/info",handler.Info)
 }
 

@@ -65,14 +65,14 @@ func (h *handler)Login(c *gin.Context) {
 		}
 
 		cliams := &jwt.CustomClaims{
-			ID: u.ID,
+			ID: user.ID,
 			UUID: key,
 			Name: user.UserName,
 		}
 		cliams.ExpiresAt = expires
 		token,err := jwt.CreateToken(cliams)
 		if err != nil {
-			log.Errorf("创建 Token 失败",err)
+			log.Errorf("创建 Token 失败, %v",err)
 			response.FailWithMessage("服务内部错误", c)
 			return
 		}
@@ -97,4 +97,24 @@ func (h *handler)Logout(c *gin.Context) {
 	claims := cliamsContext.(*jwt.CustomClaims)
 	_ = h.cache.Del(claims.UUID)
 	response.OkWithMessage("退出成功",c)
+}
+
+// @Tags 用户
+// @Summary 用户信息
+// @Produce  application/json
+// @Security ApiKeyAuth
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"登录成功"}"
+// @Router /api/v1/user/info [get]
+func (h *handler)Info(c *gin.Context) {
+	cliamsContext,_ := c.Get("claims")
+	claims := cliamsContext.(*jwt.CustomClaims)
+	u := &User{ID: claims.ID, UserName: claims.Name}
+	user,err := h.dao.Info(u)
+	if err != nil {
+		log.Errorf("用户名或密码不正确，%v",err)
+		response.FailWithMessage("用户名或密码不正确", c)
+		return
+	}
+
+	response.OkWithDetailed(user,"登录成功", c)
 }

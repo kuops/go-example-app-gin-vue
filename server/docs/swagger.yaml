@@ -43,7 +43,7 @@ paths:
       tags:
       - 用户
   /api/v1/user/logout:
-    get:
+    post:
       produces:
       - application/json
       responses:
@@ -51,7 +51,14 @@ paths:
           description: '{"success":true,"data":{},"msg":"退出成功"}'
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: 用户退出
       tags:
       - 用户
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: x-token
+    type: apiKey
 swagger: "2.0"

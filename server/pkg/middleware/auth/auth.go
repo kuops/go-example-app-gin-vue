@@ -5,12 +5,13 @@ import (
 	"github.com/kuops/go-example-app/server/pkg/response"
 	"github.com/kuops/go-example-app/server/pkg/store/redis"
 	"github.com/kuops/go-example-app/server/pkg/utils/jwt"
+	"strings"
 )
 
 func Middleware(cache redis.Interface,skipUris []string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		for _,uri := range skipUris {
-			if c.Request.RequestURI == uri {
+			if strings.HasPrefix(c.Request.RequestURI,uri) {
 				c.Next()
 				return
 			}

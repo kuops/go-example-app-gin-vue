@@ -89,8 +89,9 @@ func (h *handler)Login(c *gin.Context) {
 // @Tags 用户
 // @Summary 用户退出
 // @Produce  application/json
+// @Security ApiKeyAuth
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"退出成功"}"
-// @Router /api/v1/user/logout [get]
+// @Router /api/v1/user/logout [post]
 func (h *handler)Logout(c *gin.Context) {
 	cliamsContext,_ := c.Get("claims")
 	claims := cliamsContext.(*jwt.CustomClaims)

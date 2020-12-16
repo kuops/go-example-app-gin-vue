@@ -70,7 +70,7 @@ func (s *Server) Run(stopCh <-chan struct{}) error {
 func (s *Server) installRouters() {
 	router := gin.New()
 
-	skipAuthUri := []string{"/api/v1/user/login"}
+	skipAuthUri := []string{"/api/v1/user/login","/swagger"}
 	router.Use(cors.Middleware())
 	router.Use(auth.Middleware(s.RedisClient,skipAuthUri))
 	router.Use(prometheus.PromMiddleware(&prometheus.PromOpts{}))

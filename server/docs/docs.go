@@ -64,7 +64,12 @@ var doc = `{
             }
         },
         "/api/v1/user/logout": {
-            "get": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -96,6 +101,13 @@ var doc = `{
                     "example": "admin"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "x-token",
+            "in": "header"
         }
     }
 }`

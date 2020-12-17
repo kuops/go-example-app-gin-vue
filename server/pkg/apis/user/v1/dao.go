@@ -24,7 +24,7 @@ func (s *dao)Info(u *User) (*User,error){
 	return &user,err
 }
 
-func (s *dao)GetMenu() ([]menuv1.Menu,error){
+func (s *dao)GetAllMenu() ([]menuv1.Menu,error){
 	var menu []menuv1.Menu
 	err := s.db.Where(&menuv1.Menu{}).Find(&menu).Error
 	return menu,err
@@ -32,9 +32,9 @@ func (s *dao)GetMenu() ([]menuv1.Menu,error){
 
 func (s *dao)GetMenuByUID(u *User) ([]menuv1.Menu,error){
 	var menu []menuv1.Menu
-	sql := `select menu_id FROM table_role_menu 
-	WHERE role_id in (select role_id from table_user_role WHERE user_id = 1)`
-	err := s.db.Raw(sql, u.ID).Find(menu).Error
+	sql := `select * FROM table_menu 
+	WHERE id in (select menu_id from table_role_menu WHERE role_id in (SELECT role_id FROM table_user_role WHERE user_id = ?))`
+	err := s.db.Debug().Raw(sql, u.ID).Find(&menu).Error
 	return menu,err
 }
 

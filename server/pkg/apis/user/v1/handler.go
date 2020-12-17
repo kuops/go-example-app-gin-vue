@@ -118,14 +118,16 @@ func (h *handler)Info(c *gin.Context) {
 	var err error
 
 	if user.ID == adminID {
-		menuList,err = h.dao.GetMenu()
+		menuList,err = h.dao.GetAllMenu()
 		if err != nil {
 			log.Errorf("获取菜单失败, %v",err)
 			response.FailWithMessage("服务内部错误", c)
 			return
 		}
 	} else {
+		fmt.Println("aaa")
 		menuList, err = h.dao.GetMenuByUID(user)
+		fmt.Println("bbb")
 		if err != nil {
 			log.Errorf("获取菜单失败, %v",err)
 			response.FailWithMessage("服务内部错误", c)

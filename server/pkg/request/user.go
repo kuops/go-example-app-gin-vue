@@ -26,3 +26,12 @@ type CreateUser struct {
 	PhoneNumber string `json:"phone_number"`
 	Status      int `json:"status"`
 }
+
+type DeleteUsers struct {
+	IDS   []uint64 `json:"user_ids"`
+}
+
+type SetUserRole struct {
+	UserID uint64 `json:"user_id"`
+	RoleIDS []uint64  `json:"role_ids"`
+}

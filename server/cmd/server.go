@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/kuops/go-example-app/server/pkg/casbin"
 	"github.com/kuops/go-example-app/server/pkg/config"
 	"github.com/kuops/go-example-app/server/pkg/log"
 	"github.com/kuops/go-example-app/server/pkg/server"
@@ -44,6 +45,9 @@ func NewServer(config *config.Config,stopCh <-chan struct{}) (*server.Server, er
 		ServerConfig: &config.Server,
 		Server: httpServer,
 	}
+
+	s.MySQLConfig = &config.Mysql
+	s.Casbin = casbin.NewCasbin()
 
 	mysqlClient,err := mysql.NewMySQLClient(&config.Mysql,stopCh)
 	if err != nil {

@@ -3,6 +3,7 @@ package v1
 import (
 	"fmt"
 	linq "github.com/ahmetb/go-linq"
+	"github.com/casbin/casbin/v2"
 	"github.com/gin-gonic/gin"
 	menuv1 "github.com/kuops/go-example-app/server/pkg/apis/menu/v1"
 	"github.com/kuops/go-example-app/server/pkg/log"
@@ -10,9 +11,11 @@ import (
 	"github.com/kuops/go-example-app/server/pkg/response"
 	"github.com/kuops/go-example-app/server/pkg/store/mysql"
 	"github.com/kuops/go-example-app/server/pkg/store/redis"
+	"github.com/kuops/go-example-app/server/pkg/utils/convert"
 	"github.com/kuops/go-example-app/server/pkg/utils/jwt"
 	"github.com/kuops/go-example-app/server/pkg/utils/md5"
 	uuid "github.com/kuops/go-example-app/server/pkg/utils/uuid"
+	"gorm.io/gorm"
 	"strconv"
 	"time"
 )
@@ -20,18 +23,20 @@ import (
 type handler struct {
 	dao *dao
 	cache redis.Interface
+	enforcer *casbin.Enforcer
 }
 
-func newHandler(mysqlClient *mysql.Client,redisClient redis.Interface) *handler {
+func newHandler(mysqlClient *mysql.Client,redisClient redis.Interface,enforcer *casbin.Enforcer) *handler {
 	return &handler{
 		dao: &dao{
 			db: mysqlClient.Database().DB,
 		},
 		cache: redisClient,
+		enforcer: enforcer,
 	}
 }
 
-// @Tags 用户
+// @Tags 登录
 // @Summary 用户登录
 // @Produce  application/json
 // @Param data body request.Login true "用户名, 密码"
@@ -134,17 +139,13 @@ func (h *handler)Info(c *gin.Context) {
 			return
 		}
 	}
-	var menus  []MenuModel
+	var menus  []response.MenuModel
 	if len(menuList) > 0 {
 		var topMenuID uint64=menuList[0].ParentID
 		if topMenuID==0{
 			topMenuID=menuList[0].ID
 		}
 		menus = setMenu(menuList, topMenuID)
-	}
-
-	if len(menus) == 0 && user.ID == adminID {
-		menus = getSuperAdminMenu()
 	}
 
 	resData := map[string]interface{}{
@@ -155,48 +156,9 @@ func (h *handler)Info(c *gin.Context) {
 	response.OkWithDetailed(resData,"获取用户信息成功", c)
 }
 
-func getSuperAdminMenu() (out []MenuModel) {
-	menuTop := MenuModel{
-		Path:      "/sys",
-		Component: "Sys",
-		Name:      "Sys",
-		Meta:      MenuMeta{Title: "系统管理", NoCache: false},
-		Children:  []MenuModel{}}
-	menuModel := MenuModel{
-		Path:      "/icon",
-		Component: "Icon",
-		Name:      "Icon",
-		Meta:      MenuMeta{Title: "图标管理", NoCache: false},
-		Children:  []MenuModel{}}
-	menuTop.Children = append(menuTop.Children, menuModel)
-	menuModel = MenuModel{
-		Path:      "/menu",
-		Component: "Menu",
-		Name:      "Menu",
-		Meta:      MenuMeta{Title: "菜单管理", NoCache: false},
-		Children:  []MenuModel{}}
-	menuTop.Children = append(menuTop.Children, menuModel)
-	menuModel = MenuModel{
-		Path:      "/role",
-		Component: "Role",
-		Name:      "Role",
-		Meta:      MenuMeta{Title: "角色管理", NoCache: false},
-		Children:  []MenuModel{}}
-	menuTop.Children = append(menuTop.Children, menuModel)
-	menuModel = MenuModel{
-		Path:      "/user",
-		Component: "Admins",
-		Name:      "Admins",
-		Meta:      MenuMeta{Title: "用户管理", NoCache: false},
-		Children:  []MenuModel{}}
-	menuTop.Children = append(menuTop.Children, menuModel)
-	out = append(out, menuTop)
-	return
-}
-
-func setMenu(menus []menuv1.Menu,parentID uint64) []MenuModel {
+func setMenu(menus []menuv1.Menu,parentID uint64) []response.MenuModel {
 	var menuArr []menuv1.Menu
-	var result []MenuModel
+	var result []response.MenuModel
 	linq.From(menus).Where(func(c interface{}) bool {
 		return c.(menuv1.Menu).ParentID == parentID
 	}).OrderBy(func(c interface{}) interface{} {
@@ -205,14 +167,14 @@ func setMenu(menus []menuv1.Menu,parentID uint64) []MenuModel {
 	if len(menuArr) == 0 {
 		return result
 	}
-	noCache := false
+
 	for _, item := range menuArr {
-		menu := MenuModel{
+		menu := response.MenuModel{
 			Path:      item.URL,
 			Component: item.Code,
 			Name:      item.Code,
-			Meta:      MenuMeta{Title: item.Name, Icon: item.Icon, NoCache: noCache},
-			Children:  []MenuModel{}}
+			Meta:      response.MenuMeta{Title: item.Name, Icon: item.Icon},
+			Children:  []response.MenuModel{}}
 		if item.MenuType == 3 {
 			menu.Hidden = true
 		}
@@ -223,43 +185,20 @@ func setMenu(menus []menuv1.Menu,parentID uint64) []MenuModel {
 		}
 		if item.MenuType == 2 {
 			// 添加子级首页，有这一级NoCache才有效
-			menuIndex := MenuModel{
+			menuIndex := response.MenuModel{
 				Path:      "index",
 				Component: item.Code,
 				Name:      item.Code,
-				Meta:      MenuMeta{Title: item.Name, Icon: item.Icon, NoCache: noCache},
-				Children:  []MenuModel{}}
+				Meta:      response.MenuMeta{Title: item.Name, Icon: item.Icon},
+				Children:  []response.MenuModel{}}
 			menu.Children = append(menu.Children, menuIndex)
 			menu.Name = menu.Name + "index"
-			menu.Meta = MenuMeta{}
+			menu.Meta = response.MenuMeta{}
 		}
 		result = append(result, menu)
 	}
 	return result
 }
-
-type MenuMeta struct {
-	Title   string `json:"title"`   // 标题
-	Icon    string `json:"icon"`    // 图标
-	NoCache bool   `json:"noCache"` // 是不是缓存
-}
-
-type MenuModel struct {
-	Path      string      `json:"path"`      // 路由
-	Component string      `json:"component"` // 对应vue中的map name
-	Name      string      `json:"name"`      // 菜单名称
-	Hidden    bool        `json:"hidden"`    // 是否隐藏
-	Meta      MenuMeta    `json:"meta"`      // 菜单信息
-	Children  []MenuModel `json:"children"`  // 子级菜单
-}
-
-type UserData struct {
-	Menus        []MenuModel `json:"menus"`        // 菜单
-	Introduction string      `json:"introduction"` // 介绍
-	Avatar       string      `json:"avatar"`       // 图标
-	Name         string      `json:"name"`         // 姓名
-}
-
 
 // @Tags 用户
 // @Summary 修改密码
@@ -316,7 +255,7 @@ func (h *handler)ChangePassword(c *gin.Context) {
 // @accept application/json
 // @Produce application/json
 // @Param data body request.PageInfo true "页码, 每页大小"
-// @Success 200 {string} string "{"success":true,"data":{},"msg":"修改密码成功"}"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
 // @Router /api/v1/user/list [post]
 func (h *handler)List(c *gin.Context) {
 	var pageInfo request.PageInfo
@@ -331,7 +270,7 @@ func (h *handler)List(c *gin.Context) {
 
 	limit := pageInfo.PageSize
 	offset := pageInfo.PageSize * (pageInfo.Page - 1)
-	list,total,err :=  h.dao.GetUserInfoList(limit,offset)
+	list,total,err :=  h.dao.GetUsersList(limit,offset)
 
 	if err != nil {
 		log.Errorf("获取失败 %v",err)
@@ -359,10 +298,7 @@ func (h *handler)Detail(c *gin.Context) {
 	u := &User{ID: claims.ID, UserName: claims.Name}
 	user,_ := h.dao.Info(u)
 
-	resData := map[string]interface{}{
-		"user_info": user,
-	}
-
+	resData := user
 	response.OkWithDetailed(resData,"获取用户详情成功", c)
 
 }
@@ -413,6 +349,7 @@ func (h *handler) Create(c *gin.Context) {
 		response.FailWithMessage("账号密码不能为空", c)
 		return
 	}
+
 	req.Password = md5.Encrypt(req.Password)
 	user := User{
 		UserName:    req.UserName,
@@ -437,5 +374,110 @@ func (h *handler) Create(c *gin.Context) {
 	}
 
 	response.OkWithDetailed(resData, "添加用户成功", c)
+}
 
+// @Tags 用户
+// @Summary 删除用户
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body request.DeleteUsers true "ID"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"删除用户成功"}"
+// @Router /api/v1/user/delete [post]
+func (h *handler) Delete(c *gin.Context) {
+	req := request.DeleteUsers{}
+	var err error
+	err = c.ShouldBindJSON(&req)
+	if err != nil || len(req.IDS) == 0 {
+		log.Errorf("删除失败,%v",err)
+		response.FailWithMessage("删除失败",c)
+		return
+	}
+
+	if err := h.dao.DeleteUsers(req.IDS); err != nil {
+		log.Errorf("删除失败,%v",err)
+		response.FailWithMessage("删除失败",c)
+		return
+	}
+
+	response.OkWithMessage("删除用户成功", c)
+}
+
+// @Tags 用户
+// @Summary 查看用户的角色
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param id query int false "int valid"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"获取用户角色成功"}"
+// @Router /api/v1/user/roleList [get]
+func (h *handler) RoleList (c *gin.Context) {
+	var id uint64
+	var err error
+	var roleList []uint64
+	idstr,ok := c.GetQuery("id")
+	if ok {
+		id,err = convert.ToUint64E(idstr)
+		if err != nil {
+			response.FailWithMessage("id不为数字",c)
+			return
+		}
+	} else {
+		response.FailWithMessage("id不能为空",c)
+		return
+	}
+	userRole := UserRole{UserID: id}
+	err = h.dao.GetRoleList(&UserRole{},&userRole,&roleList,"role_id")
+
+	if err != nil {
+		log.Errorf("查找 role 失败,%v",err)
+		response.FailWithMessage("查找 role 失败",c)
+		return
+	}
+
+	response.OkWithDetailed(&roleList,"获取用户角色成功",c)
+}
+
+// @Tags 用户
+// @Summary 分配角色
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body request.SetUserRole true "用户ID 角色ID"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"分配角色成功"}"
+// @Router /api/v1/user/setrole [post]
+func (h *handler) SetRole(c *gin.Context) {
+	req := request.SetUserRole{}
+	_ = c.ShouldBindJSON(&req)
+	err := h.dao.SetRole(req.UserID,req.RoleIDS)
+	if err != nil {
+		log.Errorf("分配角色失败,%v",err)
+		response.FailWithMessage("分配角色失败",c)
+		return
+	}
+	go CasbinAddRoleForUser(h.dao.db,h.enforcer,req.UserID)
+	response.OkWithMessage("分配角色成功",c)
+}
+
+func CasbinAddRoleForUser(db *gorm.DB,enforcer *casbin.Enforcer,userid uint64) error {
+	uid:=convert.ToString(userid)
+	_,_ = enforcer.DeleteRolesForUser(uid)
+
+	var userRoles []UserRole
+	err := db.Where(&UserRole{UserID: userid}).Find(&userRoles).Error
+	if err != nil {
+		return err
+	}
+
+	roles := []string{}
+	for _, userRole := range userRoles {
+		roles = append(roles, convert.ToString(userRole.RoleID))
+	}
+
+	_,err = enforcer.AddRolesForUser(uid, roles)
+	if err != nil {
+		panic(err)
+	}
+	enforcer.SavePolicy()
+	return nil
 }

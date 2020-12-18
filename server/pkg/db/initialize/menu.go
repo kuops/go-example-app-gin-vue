@@ -23,14 +23,14 @@ var menus = &[]menuv1.Menu{
 	{ID: 13, ParentID: 10, Name: "查看", Sequence: 3, MenuType: 3, Code: "RoleView", Icon: "", OperateType: "view",URL: "/role/detail"},
 	{ID: 14, ParentID: 10, Name: "编辑", Sequence: 4, MenuType: 3, Code: "RoleUpdate", Icon: "", OperateType: "update",URL: "/role/update"},
 	{ID: 15, ParentID: 10, Name: "分页api", Sequence: 5, MenuType: 3, Code: "RoleList", Icon: "", OperateType: "list",URL: "/role/list"},
-	{ID: 16, ParentID: 10, Name: "分配角色菜单", Sequence: 6, MenuType: 3, Code: "RoleSetrolemenu", Icon: "", OperateType: "set",URL: "/role/menu"},
+	{ID: 16, ParentID: 10, Name: "分配角色菜单", Sequence: 6, MenuType: 3, Code: "RoleSetrolemenu", Icon: "", OperateType: "setrolemenu",URL: "/role/setrole"},
 	{ID: 17, ParentID: 2, Name: "后台用户管理", Sequence: 40, MenuType: 2, Code: "Users", Icon: "user", OperateType: "none",URL: "/user"},
 	{ID: 18, ParentID: 17, Name: "新增", Sequence: 1, MenuType: 3, Code: "UserAdd", Icon: "", OperateType: "add",URL: "/user/create"},
 	{ID: 19, ParentID: 17, Name: "删除", Sequence: 2, MenuType: 3, Code: "UserDel", Icon: "", OperateType: "del",URL: "/user/delete"},
 	{ID: 20, ParentID: 17, Name: "查看", Sequence: 3, MenuType: 3, Code: "UserView", Icon: "", OperateType: "view",URL: "/user/detail"},
 	{ID: 21, ParentID: 17, Name: "编辑", Sequence: 4, MenuType: 3, Code: "UserUpdate", Icon: "", OperateType: "update",URL: "/user/update"},
 	{ID: 22, ParentID: 17, Name: "分页api", Sequence: 5, MenuType: 3, Code: "UserList", Icon: "", OperateType: "list",URL: "/user/list"},
-	{ID: 23, ParentID: 17, Name: "分配角色", Sequence: 6, MenuType: 3, Code: "UserSetrole", Icon: "", OperateType: "set",URL: "/user/role"},
+	{ID: 23, ParentID: 17, Name: "分配角色", Sequence: 6, MenuType: 3, Code: "UserSetrole", Icon: "", OperateType: "setuserrole",URL: "/user/setrole"},
 }
 
 

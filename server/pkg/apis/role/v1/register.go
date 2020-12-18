@@ -7,22 +7,18 @@ import (
 	"github.com/kuops/go-example-app/server/pkg/store/redis"
 )
 
-const groupName = "user"
+const groupName = "role"
 
 func Register(group *gin.RouterGroup,mysqlClient *mysql.Client,redisClient redis.Interface,enforcer *casbin.Enforcer) {
 	handler := newHandler(mysqlClient,redisClient,enforcer)
 
 	rg := group.Group(groupName)
-	rg.POST("/login", handler.Login)
-	rg.POST("/logout",handler.Logout)
-	rg.GET("/info",handler.Info)
-	rg.POST("/changePassword",handler.ChangePassword)
 	rg.POST("/list",handler.List)
 	rg.GET("/detail",handler.Detail)
 	rg.POST("/update",handler.Update)
-	rg.POST("/create",handler.Create)
 	rg.POST("/delete",handler.Delete)
-	rg.GET("/roleList",handler.RoleList)
-	rg.POST("/setrole",handler.SetRole)
+	rg.POST("/create",handler.Create)
+	rg.GET("/allrole",handler.AllRole)
+	rg.GET("/rolemenuidlist",handler.RoleMenuIDList)
+	rg.POST("/setrole",handler.SetRoleMenus)
 }
-

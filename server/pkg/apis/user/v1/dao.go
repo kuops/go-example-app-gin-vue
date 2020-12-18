@@ -44,7 +44,7 @@ func (s *dao)ChangePassword(u *User) error {
 	return err
 }
 
-func (s *dao)GetUserInfoList(limit,offset int) ([]User,int64,error) {
+func (s *dao)GetUsersList(limit,offset int) ([]User,int64,error) {
 	var users []User
 	var total int64
 	 _ = s.db.Model(User{}).Count(&total)
@@ -64,4 +64,60 @@ func (s *dao)CreateUser(u *User) (*User,error) {
 	}
 	err := s.db.Model(&User{}).Create(u).Error
 	return u,err
+}
+
+
+func (s *dao)DeleteUsers(ids []uint64) error {
+	tx := s.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+	if err := tx.Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Where("id in (?)", ids).Delete(&User{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Where("user_id in (?)", ids).Delete(&User{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	return tx.Commit().Error
+}
+
+func (s *dao)GetRoleList(model,where interface{},out interface{},fieldName string) error {
+	return s.db.Model(model).Where(where).Pluck(fieldName, out).Error
+}
+
+func (s *dao) SetRole(adminsid uint64, roleids []uint64) error {
+	tx := s.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+	if err := tx.Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Where(&UserRole{UserID: adminsid}).Delete(&UserRole{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if len(roleids) > 0 {
+		for _, rid := range roleids {
+			rm := new(UserRole)
+			rm.RoleID = rid
+			rm.UserID = adminsid
+			if err := tx.Create(rm).Error; err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+	}
+	return tx.Commit().Error
 }

@@ -3,7 +3,9 @@ package server
 import (
 	"context"
 	"github.com/gin-gonic/gin"
+	menuv1 "github.com/kuops/go-example-app/server/pkg/apis/menu/v1"
 	"github.com/kuops/go-example-app/server/pkg/apis/metrics"
+	rolev1 "github.com/kuops/go-example-app/server/pkg/apis/role/v1"
 	userv1 "github.com/kuops/go-example-app/server/pkg/apis/user/v1"
 	"github.com/kuops/go-example-app/server/pkg/casbin"
 	"github.com/kuops/go-example-app/server/pkg/config"
@@ -26,7 +28,9 @@ type Server struct {
 	Server       *http.Server
 	ServerConfig *config.ServerConfig
 	MySQLClient  *mysql.Client
+	MySQLConfig  *config.MySQLConfig
 	RedisClient  redis.Interface
+	Casbin     *casbin.Casbin
 }
 
 func (s *Server) PrepareRun() error {
@@ -75,13 +79,26 @@ func (s *Server) installRouters() {
 		"/metrics",
 	}
 
+	skipCasbinUri := []string {
+		"/api/v1/user/login",
+		"/swagger",
+		"/metrics",
+		"/api/v1/user/info",
+		"/api/v1/user/roleList",
+		"/api/v1/user/changePassword",
+		"/api/v1/menu/allmenu",
+		"/api/v1/menu/menubuttonlist",
+		"/api/v1/role/allrole",
+		"/api/v1/role/rolemenuidlist",
+	}
+
 	middlewares := []gin.HandlerFunc {
 		logger.GinLogger(),
 		logger.GinRecovery(),
 		cors.Middleware(),
 		auth.Middleware(s.RedisClient,skipAuthUri),
 		prometheus.PromMiddleware(&prometheus.PromOpts{}),
-		casbinmw.Middleware(skipAuthUri),
+		casbinmw.Middleware(skipCasbinUri,s.Casbin.Enforcer),
 	}
 
 	router.Use(middlewares...)
@@ -94,7 +111,9 @@ func (s *Server) installRouters() {
 	apiv1Group := router.Group("api/v1")
 
 	metrics.Register(rootGroup)
-	userv1.Register(apiv1Group, s.MySQLClient,s.RedisClient)
+	userv1.Register(apiv1Group, s.MySQLClient,s.RedisClient,s.Casbin.Enforcer)
+	menuv1.Register(apiv1Group, s.MySQLClient,s.RedisClient,s.Casbin.Enforcer)
+	rolev1.Register(apiv1Group, s.MySQLClient,s.RedisClient,s.Casbin.Enforcer)
 
 	s.Server.Handler = router
 	log.Info("注册路由成功...")
@@ -120,5 +139,5 @@ func (s *Server)InitialDatas()  {
 
 func (s *Server)InitCsbinEnforcer()  {
 	log.Info("初始化权限系统...")
-	casbin.InitCsbinEnforcer(s.MySQLClient)
+	s.Casbin.InitCsbinEnforcer(s.MySQLConfig,s.MySQLClient)
 }

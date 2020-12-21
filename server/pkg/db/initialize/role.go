@@ -53,6 +53,19 @@ var roleMenu = &[]rolev1.RoleMenu {
 	{ID:        21, RoleID:    2, MenuID:    21},
 	{ID:        22, RoleID:    2, MenuID:    22},
 	{ID:        23, RoleID:    2, MenuID:    23},
+	{ID:        24, RoleID:    2, MenuID:    24},
+	{ID:        25, RoleID:    2, MenuID:    25},
+	{ID:        26, RoleID:    2, MenuID:    26},
+	{ID:        27, RoleID:    2, MenuID:    27},
+	{ID:        28, RoleID:    2, MenuID:    28},
+	{ID:        29, RoleID:    2, MenuID:    29},
+	{ID:        30, RoleID:    2, MenuID:    30},
+	{ID:        31, RoleID:    2, MenuID:    31},
+	{ID:        32, RoleID:    2, MenuID:    32},
+	{ID:        33, RoleID:    2, MenuID:    33},
+	{ID:        34, RoleID:    2, MenuID:    34},
+	{ID:        35, RoleID:    2, MenuID:    35},
+	{ID:        36, RoleID:    2, MenuID:    36},
 }
 
 func InitialRoleMenu(client *mysql.Client) {

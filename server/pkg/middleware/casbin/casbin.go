@@ -30,7 +30,6 @@ func Middleware(skipUris []string,Enforcer *casbin.Enforcer) gin.HandlerFunc {
 		sub := convert.ToString(waitUse.ID)
 		// 判断策略中是否存在
 		success, err := Enforcer.Enforce(sub, obj, act)
-
 		if err != nil {
 			log.Error(err)
 			response.FailWithDetailed(gin.H{}, "权限不足", c)

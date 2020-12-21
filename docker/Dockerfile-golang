@@ -1,0 +1,15 @@
+FROM golang:1.15.6
+ENV GO111MODULE=on
+ENV GOPROXY=https://goproxy.io,https://goproxy.cn,direct
+WORKDIR /go/src/github.com/kuops/go-example-app
+COPY server ./server
+COPY go.mod go.sum ./
+RUN ls -al && pwd
+RUN cd server/ && go build -o app .
+
+FROM centos:7
+WORKDIR /root/
+COPY --from=0 /go/src/github.com/kuops/go-example-app/server/app .
+COPY --from=0 /go/src/github.com/kuops/go-example-app/server/configs/dev-docker.yaml config.yaml
+RUN ls -al
+CMD ["./app","--config","config.yaml"]

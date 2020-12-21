@@ -99,14 +99,14 @@ definitions:
     type: object
   request.DeleteMenus:
     properties:
-      user_ids:
+      menu_ids:
         items:
           type: integer
         type: array
     type: object
   request.DeleteRoles:
     properties:
-      user_ids:
+      role_ids:
         items:
           type: integer
         type: array
@@ -127,11 +127,32 @@ definitions:
         example: admin
         type: string
     type: object
-  request.PageInfo:
+  request.MenuList:
     properties:
+      key:
+        type: string
       page:
         type: integer
       pageSize:
+        type: integer
+      parent_id:
+        type: integer
+      sort:
+        type: string
+      type:
+        type: integer
+    type: object
+  request.RoleList:
+    properties:
+      key:
+        type: string
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      sort:
+        type: string
+      status:
         type: integer
     type: object
   request.SetRoleMenus:
@@ -150,6 +171,19 @@ definitions:
           type: integer
         type: array
       user_id:
+        type: integer
+    type: object
+  request.UserList:
+    properties:
+      key:
+        type: string
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      sort:
+        type: string
+      status:
         type: integer
     type: object
   v1.Role:
@@ -214,6 +248,57 @@ info:
   title: Swagger Example API
   version: "1.0"
 paths:
+  /api/v1/cluster/namespace/create:
+    post:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"获取成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 查看命名空间
+      tags:
+      - 命名空间
+  /api/v1/cluster/namespace/delete:
+    delete:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"获取成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 查看命名空间
+      tags:
+      - 命名空间
+  /api/v1/cluster/namespace/list:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"获取成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 查看命名空间
+      tags:
+      - 命名空间
   /api/v1/menu/create:
     post:
       consumes:
@@ -235,6 +320,29 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: 添加菜单
+      tags:
+      - 菜单
+  /api/v1/menu/delete:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.DeleteMenus'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"删除用户成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 删除菜单
       tags:
       - 菜单
   /api/v1/menu/detail:
@@ -266,7 +374,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/request.PageInfo'
+          $ref: '#/definitions/request.MenuList'
       produces:
       - application/json
       - application/json
@@ -413,7 +521,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/request.PageInfo'
+          $ref: '#/definitions/request.RoleList'
       produces:
       - application/json
       - application/json
@@ -561,6 +669,11 @@ paths:
       - 用户
   /api/v1/user/detail:
     get:
+      parameters:
+      - description: int valid
+        in: query
+        name: id
+        type: integer
       produces:
       - application/json
       responses:
@@ -597,7 +710,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/request.PageInfo'
+          $ref: '#/definitions/request.UserList'
       produces:
       - application/json
       - application/json
@@ -644,27 +757,6 @@ paths:
       summary: 用户退出
       tags:
       - 用户
-  /api/v1/user/roleList:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: int valid
-        in: query
-        name: id
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: '{"success":true,"data":{},"msg":"获取用户角色成功"}'
-          schema:
-            type: string
-      security:
-      - ApiKeyAuth: []
-      summary: 查看用户的角色
-      tags:
-      - 用户
   /api/v1/user/setrole:
     post:
       consumes:
@@ -709,6 +801,27 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: 更新用户信息
+      tags:
+      - 用户
+  /api/v1/user/usersroleidlist:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: int valid
+        in: query
+        name: id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"获取用户角色成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 查看用户的角色
       tags:
       - 用户
 securityDefinitions:

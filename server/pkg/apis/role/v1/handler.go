@@ -34,23 +34,49 @@ func newHandler(mysqlClient *mysql.Client,redisClient redis.Interface,enforcer *
 // @Security ApiKeyAuth
 // @accept application/json
 // @Produce application/json
-// @Param data body request.PageInfo true "页码, 每页大小"
+// @Param data body request.RoleList true "页码, 每页大小"
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
 // @Router /api/v1/role/list [post]
 func (h *handler)List(c *gin.Context) {
-	var pageInfo request.PageInfo
-	_ = c.ShouldBindJSON(&pageInfo)
+	var req request.RoleList
+	_ = c.ShouldBindJSON(&req)
 	var err error
 
-	if pageInfo.PageSize == 0 || pageInfo.Page == 0 {
+	if req.PageSize == 0 || req.Page == 0 {
 		log.Error("分页参数参数非法")
 		response.FailWithMessage("参数不正确", c)
 		return
 	}
 
-	limit := pageInfo.PageSize
-	offset := pageInfo.PageSize * (pageInfo.Page - 1)
-	list,total,err :=  h.dao.GetRolesList(limit,offset)
+	var whereOrder []request.PageWhereOrder
+	order := "ID DESC"
+	if len(req.Sort) >= 2 {
+		orderType := req.Sort[0:1]
+		order = req.Sort[1:len(req.Sort)]
+		if orderType == "+" {
+			order += " ASC"
+		} else {
+			order += " DESC"
+		}
+	}
+	whereOrder = append(whereOrder, request.PageWhereOrder{Order: order})
+	if req.Key != "" {
+		v := "%" + req.Key + "%"
+		var arr []interface{}
+		arr = append(arr, v)
+		arr = append(arr, v)
+		whereOrder = append(whereOrder, request.PageWhereOrder{Where: "name like ?", Value: arr})
+	}
+	if req.Status > 0 {
+		var arr []interface{}
+		arr = append(arr, req.Status)
+		whereOrder = append(whereOrder, request.PageWhereOrder{Where: "parent_id = ?", Value: arr})
+	}
+	var total int64
+	list:= []Role{}
+	index:= int(req.Page)
+	limit:= int(req.PageSize)
+	err =  h.dao.GetRolesList(&Role{}, &Role{}, &list, index, limit, &total, whereOrder...)
 
 	if err != nil {
 		log.Errorf("获取失败 %v",err)
@@ -59,8 +85,8 @@ func (h *handler)List(c *gin.Context) {
 		response.OkWithDetailed(response.PageResult{
 			List:     list,
 			Total:    total,
-			Page:     pageInfo.Page,
-			PageSize: pageInfo.PageSize,
+			Page:     index,
+			PageSize: limit,
 		}, "获取成功", c)
 	}
 }
@@ -258,6 +284,7 @@ func (h *handler) SetRoleMenus(c *gin.Context) {
 }
 
 func CasbinSetRolePermission(db *gorm.DB,enforcer *casbin.Enforcer,roleid uint64) {
+	_,_ = enforcer.DeletePermissionsForUser(convert.ToString(roleid))
 	var roleMenus []RoleMenu
 	err := db.Where(&RoleMenu{RoleID: roleid}).Find(&roleMenus).Error
 	if err != nil {
@@ -267,7 +294,7 @@ func CasbinSetRolePermission(db *gorm.DB,enforcer *casbin.Enforcer,roleid uint64
 		menu := Menu{}
 		where := Menu{}
 		where.ID = roleMenu.MenuID
-		err = db.Where(&where).First(&menu).Error
+		err = db.Table("table_menu").Where(&where).First(&menu).Error
 		if err != nil {
 			return
 		}
@@ -277,5 +304,6 @@ func CasbinSetRolePermission(db *gorm.DB,enforcer *casbin.Enforcer,roleid uint64
 				log.Error(err)
 			}
 		}
+		_ = enforcer.SavePolicy()
 	}
 }

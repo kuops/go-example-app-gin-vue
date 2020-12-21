@@ -7,6 +7,7 @@ import (
 	"github.com/kuops/go-example-app/server/pkg/apis/metrics"
 	rolev1 "github.com/kuops/go-example-app/server/pkg/apis/role/v1"
 	userv1 "github.com/kuops/go-example-app/server/pkg/apis/user/v1"
+	clusterv1 "github.com/kuops/go-example-app/server/pkg/apis/cluster/v1"
 	"github.com/kuops/go-example-app/server/pkg/casbin"
 	"github.com/kuops/go-example-app/server/pkg/config"
 	dbinit "github.com/kuops/go-example-app/server/pkg/db/initialize"
@@ -21,6 +22,8 @@ import (
 	"github.com/kuops/go-example-app/server/pkg/utils/ip"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/kubernetes"
 	"net/http"
 )
 
@@ -31,6 +34,8 @@ type Server struct {
 	MySQLConfig  *config.MySQLConfig
 	RedisClient  redis.Interface
 	Casbin     *casbin.Casbin
+	KubernetesClientSet *kubernetes.Clientset
+	KubernetesDynamic  dynamic.Interface
 }
 
 func (s *Server) PrepareRun() error {
@@ -39,7 +44,6 @@ func (s *Server) PrepareRun() error {
 	s.InitialDatas()
 	s.InitCsbinEnforcer()
 	s.installRouters()
-
 
 	return nil
 }
@@ -81,6 +85,7 @@ func (s *Server) installRouters() {
 
 	skipCasbinUri := []string {
 		"/api/v1/user/login",
+		"/api/v1/user/logout",
 		"/swagger",
 		"/metrics",
 		"/api/v1/user/info",
@@ -114,6 +119,7 @@ func (s *Server) installRouters() {
 	userv1.Register(apiv1Group, s.MySQLClient,s.RedisClient,s.Casbin.Enforcer)
 	menuv1.Register(apiv1Group, s.MySQLClient,s.RedisClient,s.Casbin.Enforcer)
 	rolev1.Register(apiv1Group, s.MySQLClient,s.RedisClient,s.Casbin.Enforcer)
+	clusterv1.Register(apiv1Group, s.MySQLClient,s.RedisClient,s.Casbin.Enforcer,s.KubernetesClientSet,s.KubernetesDynamic)
 
 	s.Server.Handler = router
 	log.Info("注册路由成功...")

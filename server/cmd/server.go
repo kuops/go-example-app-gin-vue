@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/kuops/go-example-app/server/pkg/casbin"
 	"github.com/kuops/go-example-app/server/pkg/config"
+	"github.com/kuops/go-example-app/server/pkg/kubernetes"
 	"github.com/kuops/go-example-app/server/pkg/log"
 	"github.com/kuops/go-example-app/server/pkg/server"
 	"github.com/kuops/go-example-app/server/pkg/store/mysql"
@@ -60,6 +61,19 @@ func NewServer(config *config.Config,stopCh <-chan struct{}) (*server.Server, er
 		return nil, err
 	}
 	s.RedisClient = redisClient
+
+	clientSet, err := kubernetes.NewClientSet(&config.Kubernetes)
+	if err != nil {
+		return nil, err
+	}
+
+	s.KubernetesClientSet = clientSet
+
+	dynamicClient, err := kubernetes.NewDynamic(&config.Kubernetes)
+	if err != nil {
+		return nil, err
+	}
+	s.KubernetesDynamic = dynamicClient
 
 	return s, nil
 }

@@ -35,23 +35,54 @@ func newHandler(mysqlClient *mysql.Client,redisClient redis.Interface,enforcer *
 // @Security ApiKeyAuth
 // @accept application/json
 // @Produce application/json
-// @Param data body request.PageInfo true "页码, 每页大小"
+// @Param data body request.MenuList true "页码, 每页大小"
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
 // @Router /api/v1/menu/list [post]
 func (h *handler)List(c *gin.Context) {
-	var pageInfo request.PageInfo
-	_ = c.ShouldBindJSON(&pageInfo)
+	var req request.MenuList
+	_ = c.ShouldBindJSON(&req)
 	var err error
 
-	if pageInfo.PageSize == 0 || pageInfo.Page == 0 {
+	if req.PageSize == 0 || req.Page == 0 {
 		log.Error("分页参数参数非法")
 		response.FailWithMessage("参数不正确", c)
 		return
 	}
 
-	limit := pageInfo.PageSize
-	offset := pageInfo.PageSize * (pageInfo.Page - 1)
-	list,total,err :=  h.dao.GetMenusList(limit,offset)
+	var whereOrder []request.PageWhereOrder
+	order := "ID DESC"
+	if len(req.Sort) >= 2 {
+		orderType := req.Sort[0:1]
+		order = req.Sort[1:len(req.Sort)]
+		if orderType == "+" {
+			order += " ASC"
+		} else {
+			order += " DESC"
+		}
+	}
+	whereOrder = append(whereOrder, request.PageWhereOrder{Order: order})
+	if req.Key != "" {
+		v := "%" + req.Key + "%"
+		var arr []interface{}
+		arr = append(arr, v)
+		arr = append(arr, v)
+		whereOrder = append(whereOrder, request.PageWhereOrder{Where: "name like ? or code like ?", Value: arr})
+	}
+	if req.MenuType > 0 {
+		var arr []interface{}
+		arr = append(arr, req.MenuType)
+		whereOrder = append(whereOrder, request.PageWhereOrder{Where: "menu_type = ?", Value: arr})
+	}
+	if req.ParentID > 0 {
+		var arr []interface{}
+		arr = append(arr, req.ParentID)
+		whereOrder = append(whereOrder, request.PageWhereOrder{Where: "parent_id = ?", Value: arr})
+	}
+	var total int64
+	var list []Menu
+	index:= int(req.Page)
+	limit:= int(req.PageSize)
+	err =  h.dao.GetMenusList(&Menu{}, &Menu{}, &list, index, limit, &total, whereOrder...)
 
 	if err != nil {
 		log.Errorf("获取失败 %v",err)
@@ -60,11 +91,10 @@ func (h *handler)List(c *gin.Context) {
 		response.OkWithDetailed(response.PageResult{
 			List:     list,
 			Total:    total,
-			Page:     pageInfo.Page,
-			PageSize: pageInfo.PageSize,
+			Page:     index,
+			PageSize: limit,
 		}, "获取成功", c)
 	}
-
 }
 
 
@@ -97,10 +127,7 @@ func (h *handler)Detail(c *gin.Context) {
 		response.FailWithMessage("获取失败", c)
 	}
 
-	resData := map[string]interface{}{
-		"menu_detail": m,
-	}
-
+	resData := m
 	response.OkWithDetailed(resData, "获取成功", c)
 }
 
@@ -141,7 +168,7 @@ func (h *handler) Update(c *gin.Context) {
 // @Produce application/json
 // @Param data body request.DeleteMenus true "ID"
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"删除用户成功"}"
-// @Router /api/v1/user/delete [post]
+// @Router /api/v1/menu/delete [post]
 func (h *handler) Delete(c *gin.Context) {
 	req := request.DeleteMenus{}
 	var err error
@@ -187,10 +214,7 @@ func (h *handler) Create(c *gin.Context) {
 		return
 	}
 
-	resData := map[string]interface{}{
-		"menu_info": m,
-	}
-
+	resData :=  m
 	go h.InitMenu(m)
 	response.OkWithDetailed(resData, "添加菜单成功", c)
 }

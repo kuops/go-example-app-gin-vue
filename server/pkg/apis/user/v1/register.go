@@ -22,7 +22,7 @@ func Register(group *gin.RouterGroup,mysqlClient *mysql.Client,redisClient redis
 	rg.POST("/update",handler.Update)
 	rg.POST("/create",handler.Create)
 	rg.POST("/delete",handler.Delete)
-	rg.GET("/roleList",handler.RoleList)
+	rg.GET("/usersroleidlist",handler.UsersRoleList)
 	rg.POST("/setrole",handler.SetRole)
 }
 

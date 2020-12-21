@@ -11,9 +11,22 @@ type ChangePassword struct {
 	NewPassword string `json:"newPassword" example:"1234567"`
 }
 
-type PageInfo struct {
-	Page     int `json:"page" form:"page"`
-	PageSize int `json:"pageSize" form:"pageSize"`
+type UserPageInfo struct {
+	Page     uint64 `json:"page" form:"page"`
+	PageSize uint64 `json:"pageSize" form:"pageSize"`
+}
+
+type UserList struct {
+	UserPageInfo
+	Key  string `json:"key"`
+	Status uint64 `json:"status"`
+	Sort string `json:"sort"`
+}
+
+type PageWhereOrder struct {
+	Order string
+	Where string
+	Value []interface{}
 }
 
 type CreateUser struct {

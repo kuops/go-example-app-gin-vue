@@ -3,6 +3,7 @@ package v1
 import (
 	"errors"
 	menuv1 "github.com/kuops/go-example-app/server/pkg/apis/menu/v1"
+	"github.com/kuops/go-example-app/server/pkg/request"
 	"github.com/kuops/go-example-app/server/pkg/utils/md5"
 	"gorm.io/gorm"
 )
@@ -20,7 +21,7 @@ func (s *dao)Login(u *User) (*User,error){
 
 func (s *dao)Info(u *User) (*User,error){
 	var user User
-	err := s.db.Where("id = ? AND user_name = ?", u.ID, u.UserName).First(&user).Error
+	err := s.db.Where("id = ?", u.ID).First(&user).Error
 	return &user,err
 }
 
@@ -44,12 +45,26 @@ func (s *dao)ChangePassword(u *User) error {
 	return err
 }
 
-func (s *dao)GetUsersList(limit,offset int) ([]User,int64,error) {
-	var users []User
-	var total int64
-	 _ = s.db.Model(User{}).Count(&total)
-	err := s.db.Model(User{}).Limit(limit).Offset(offset).Find(&users).Error
-	return users,total,err
+func (s *dao)GetUsersList(model,where interface{},out interface{},pageIndex, pageSize int,totalCount *int64,whereOrder ...request.PageWhereOrder) error{
+	db:=s.db.Model(model).Where(where)
+	if len(whereOrder)>0 {
+		for _,wo:=range whereOrder {
+			if wo.Order !="" {
+				db=db.Order(wo.Order)
+			}
+			if wo.Where !="" {
+				db=db.Where(wo.Where,wo.Value...)
+			}
+		}
+	}
+	err:=db.Count(totalCount).Error
+	if err!=nil{
+		return err
+	}
+	if *totalCount==0{
+		return nil
+	}
+	return db.Offset((pageIndex - 1) * pageSize).Limit(pageSize).Find(out).Error
 }
 
 func (s *dao)UpdateUserInfo(u *User) (*User,error) {
@@ -82,7 +97,7 @@ func (s *dao)DeleteUsers(ids []uint64) error {
 		tx.Rollback()
 		return err
 	}
-	if err := tx.Where("user_id in (?)", ids).Delete(&User{}).Error; err != nil {
+	if err := tx.Where("user_id in (?)", ids).Delete(&UserRole{}).Error; err != nil {
 		tx.Rollback()
 		return err
 	}

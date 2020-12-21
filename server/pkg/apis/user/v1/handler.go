@@ -254,23 +254,49 @@ func (h *handler)ChangePassword(c *gin.Context) {
 // @Security ApiKeyAuth
 // @accept application/json
 // @Produce application/json
-// @Param data body request.PageInfo true "页码, 每页大小"
+// @Param data body request.UserList true "页码, 每页大小"
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
 // @Router /api/v1/user/list [post]
 func (h *handler)List(c *gin.Context) {
-	var pageInfo request.PageInfo
-	_ = c.ShouldBindJSON(&pageInfo)
+	var req request.UserList
+	_ = c.ShouldBindJSON(&req)
 	var err error
 
-	if pageInfo.PageSize == 0 || pageInfo.Page == 0 {
+	if req.PageSize == 0 || req.Page == 0 {
 		log.Error("分页参数参数非法")
 		response.FailWithMessage("参数不正确", c)
 		return
 	}
 
-	limit := pageInfo.PageSize
-	offset := pageInfo.PageSize * (pageInfo.Page - 1)
-	list,total,err :=  h.dao.GetUsersList(limit,offset)
+	var whereOrder []request.PageWhereOrder
+	order := "ID DESC"
+	if len(req.Sort) >= 2 {
+		orderType := req.Sort[0:1]
+		order = req.Sort[1:len(req.Sort)]
+		if orderType == "+" {
+			order += " ASC"
+		} else {
+			order += " DESC"
+		}
+	}
+	whereOrder = append(whereOrder, request.PageWhereOrder{Order: order})
+	if req.Key != "" {
+		v := "%" + req.Key + "%"
+		var arr []interface{}
+		arr = append(arr, v)
+		arr = append(arr, v)
+		whereOrder = append(whereOrder, request.PageWhereOrder{Where: "user_name like ? or real_name like ?", Value: arr})
+	}
+	if req.Status > 0 {
+		var arr []interface{}
+		arr = append(arr, req.Status)
+		whereOrder = append(whereOrder, request.PageWhereOrder{Where: "status = ?", Value: arr})
+	}
+	var total int64
+	list:= []User{}
+	index:= int(req.Page)
+	limit:= int(req.PageSize)
+	err =  h.dao.GetUsersList(&User{}, &User{}, &list, index, limit, &total, whereOrder...)
 
 	if err != nil {
 		log.Errorf("获取失败 %v",err)
@@ -279,8 +305,8 @@ func (h *handler)List(c *gin.Context) {
 		response.OkWithDetailed(response.PageResult{
 			List:     list,
 			Total:    total,
-			Page:     pageInfo.Page,
-			PageSize: pageInfo.PageSize,
+			Page:     index,
+			PageSize: limit,
 		}, "获取成功", c)
 	}
 
@@ -290,17 +316,30 @@ func (h *handler)List(c *gin.Context) {
 // @Summary 用户详情
 // @Produce  application/json
 // @Security ApiKeyAuth
+// @Param id query int false "int valid"
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"获取用户详情成功"}"
 // @Router /api/v1/user/detail [get]
 func (h *handler)Detail(c *gin.Context) {
 	cliamsContext,_ := c.Get("claims")
 	claims := cliamsContext.(*jwt.CustomClaims)
-	u := &User{ID: claims.ID, UserName: claims.Name}
-	user,_ := h.dao.Info(u)
+	var id uint64
+	var err error
+	var u User
+	idstr,ok := c.GetQuery("id")
+	if ok {
+		id,err = convert.ToUint64E(idstr)
+		if err != nil {
+			response.FailWithMessage("id不为数字",c)
+			return
+		}
+		u.ID = id
+	} else {
+		u.ID = claims.ID
+	}
 
+	user,_ := h.dao.Info(&u)
 	resData := user
 	response.OkWithDetailed(resData,"获取用户详情成功", c)
-
 }
 
 // @Tags 用户
@@ -410,8 +449,8 @@ func (h *handler) Delete(c *gin.Context) {
 // @Produce application/json
 // @Param id query int false "int valid"
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"获取用户角色成功"}"
-// @Router /api/v1/user/roleList [get]
-func (h *handler) RoleList (c *gin.Context) {
+// @Router /api/v1/user/usersroleidlist [get]
+func (h *handler) UsersRoleList (c *gin.Context) {
 	var id uint64
 	var err error
 	var roleList []uint64

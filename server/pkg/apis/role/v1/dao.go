@@ -1,17 +1,12 @@
 package v1
 
-import "gorm.io/gorm"
+import (
+	"github.com/kuops/go-example-app/server/pkg/request"
+	"gorm.io/gorm"
+)
 
 type dao struct {
 	db *gorm.DB
-}
-
-func (s *dao)GetRolesList(limit,offset int) ([]Role,int64,error) {
-	var roles []Role
-	var total int64
-	_ = s.db.Model(Role{}).Count(&total)
-	err := s.db.Model(Role{}).Limit(limit).Offset(offset).Find(&roles).Error
-	return roles,total,err
 }
 
 func (s *dao)GetRolesDetail(r *Role) (*Role,error) {
@@ -89,4 +84,26 @@ func (s *dao)SetRoleMenus(roleid uint64, menuids []uint64) error {
 		}
 	}
 	return tx.Commit().Error
+}
+
+func (s *dao)GetRolesList(model,where interface{},out interface{},pageIndex, pageSize int,totalCount *int64,whereOrder ...request.PageWhereOrder) error{
+	db:=s.db.Model(model).Where(where)
+	if len(whereOrder)>0 {
+		for _,wo:=range whereOrder {
+			if wo.Order !="" {
+				db=db.Order(wo.Order)
+			}
+			if wo.Where !="" {
+				db=db.Where(wo.Where,wo.Value...)
+			}
+		}
+	}
+	err:=db.Count(totalCount).Error
+	if err!=nil{
+		return err
+	}
+	if *totalCount==0{
+		return nil
+	}
+	return db.Offset((pageIndex - 1) * pageSize).Limit(pageSize).Find(out).Error
 }

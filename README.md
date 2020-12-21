@@ -83,12 +83,12 @@ yarn dev
 <details>
 <summary>Expand view</summary>
     <pre>
-        <code>.
-        <img src="./img/menu.png" width="3820" height="1234" /><br/><br/>
-        <img src="./img/role.png" width="3802" height="1242" /><br/><br/>
-        <img src="./img/namespace.png" width="3806" height="1246" /><br/><br/>
-        <img src="./img/deployment.png" width="3752" height="1330" /><br/><br/>
-        <img src="./img/swagger.png" width="3298" height="1852" /><br/><br/>
+        <code>
+        <img src="./img/menu.png" width="100%"/><br/><br/>
+        <img src="./img/role.png" width="100%"/><br/><br/>
+        <img src="./img/namespace.png" width="100%"/><br/><br/>
+        <img src="./img/deployment.png" width="100%"/><br/><br/>
+        <img src="./img/swagger.png" width="100%"/><br/><br/>
         </code>
     </pre>
 </details>

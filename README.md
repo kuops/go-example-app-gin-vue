@@ -9,9 +9,9 @@
 This is a `gin + vue`  example app, include user manage , rbac permision, 
 menu generator and kubernetes manage. 
 
-### Using Compoment
+### Using Component
 
-This Demo Project Using These Compoment, Thanks for these project: 
+This Demo Project Using These Component, Thanks for these project: 
 
 - gin
 - vue-element-admin

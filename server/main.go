@@ -1,110 +1,32 @@
 package main
 
 import (
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
-	"time"
+	"github.com/kuops/go-example-app/server/cmd"
+	_ "github.com/kuops/go-example-app/server/docs"
+	"os"
 )
 
-type Info struct {
-	Roles []string `json:"roles"`
-	Introduction string `json:"introduction"`
-	Avatar string `json:"avatar"`
-	Name string `json:"name"`
-}
+// @title Swagger Example API
+// @version 1.0
+// @description This is a sample server Petstore server.
+// @termsOfService http://swagger.io/terms/
 
-type Table struct {
-	Total int `json:"total"`
-	Items []Item `json:"items"`
-}
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
 
-type Item struct {
-	ID int `json:"id"`
-	Title string `json:"title"`
-	Author string `json:"author"`
-	Time   string `json:"display_time"`
-	Pageviews uint32  `json:"pageviews"`
-	Status  string  `json:"status"`
-}
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name x-token
 
+// @host localhost:8080
+// @BasePath /
 func main() {
-
-	var info = &Info{
-		Avatar: "https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif",
-		Roles: []string{"admin"},
-		Introduction: "I am a super administrato",
-		Name: "Admin",
+	command := cmd.NewServerCommand()
+	if err := command.Execute(); err != nil {
+		os.Exit(1)
 	}
-
-	var token = map[string]string{
-		"token": "admin-token",
-	}
-
-	r := gin.Default()
-	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"*"}
-	config.AllowHeaders = []string{"*"}
-	r.Use(cors.New(config))
-
-	r.GET("api/v1/vue-admin-template/user/info", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"code":20000,
-			"data": info,
-		})
-	})
-
-	r.POST("api/v1/vue-admin-template/user/login", func(c *gin.Context) {
-		c.JSON(200,gin.H{
-			"code":20000,
-			"data": token,
-		})
-	})
-
-	r.POST("api/v1/vue-admin-template/user/logout", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"code":20000,
-			"data": "success",
-		})
-	})
-	
-	var items = []Item{
-		{
-			ID:        0,
-			Title:     "First",
-			Author:    "anonymous",
-			Time:      time.Now().Format("2006-01-02 15:01:05"),
-			Pageviews: 6666,
-			Status: "draft",
-		},
-		{
-			ID:        1,
-			Title:     "Second",
-			Author:    "anonymous",
-			Time:      time.Now().Format("2006-01-02 15:01:05"),
-			Pageviews: 7777,
-			Status: "published",
-		},
-		{
-			ID:        1,
-			Title:     "third",
-			Author:    "anonymous",
-			Time:      time.Now().Format("2006-01-02 15:01:05"),
-			Pageviews: 5555,
-			Status: "deleted",
-		},
-	}
-	var table = &Table{
-		Total: len(items),
-		Items: items,
-	}
-
-	r.GET("api/v1/vue-admin-template/table/list", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"code":20000,
-			"data": table,
-		})
-	})
-
-	r.Run(":8080")
 }

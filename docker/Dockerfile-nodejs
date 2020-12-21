@@ -1,0 +1,12 @@
+FROM node:15.4.0
+WORKDIR /app
+COPY website .
+
+RUN ls -al && pwd
+RUN npm install --registry=https://registry.npm.taobao.org
+RUN npm rebuild node-sass
+RUN npm run build:docker-dev
+
+FROM nginx:latest
+COPY --from=0 /app/nginx/default.conf /etc/nginx/conf.d/default.conf
+COPY --from=0 /app/dist /var/www/html

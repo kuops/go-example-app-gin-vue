@@ -1,0 +1,65 @@
+version: '3.3'
+
+services:
+#  backend:
+#    build:
+#      context: .
+#      dockerfile: docker/Dockerfile-golang
+#    ports:
+#      - 8080:8080
+#    command: ./app --config config.yaml
+#    volumes:
+#      - $HOME/.kube/config:/root/.kube/config
+#    depends_on:
+#      - mysql
+#      - redis
+#    restart: always
+#    networks:
+#      network:
+#        ipv4_address: 172.31.0.100
+#  frontend:
+#    build:
+#      context: .
+#      dockerfile: docker/Dockerfile-nodejs
+#    ports:
+#    - 9999:80
+#    restart: always
+#    networks:
+#      network:
+#        ipv4_address: 172.31.0.101
+  mysql:
+    image: mysql:8.0
+    ports:
+      - 3306:3306
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: demo
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    networks:
+      network:
+        ipv4_address: 172.31.0.102
+  redis:
+    image: redis:5.0
+    ports:
+      - 6379:6379
+    volumes:
+      - redis_data:/data
+    restart: always
+    environment:
+      REDIS_PASSWORD: 123456
+    command: ["bash", "-c",'docker-entrypoint.sh --requirepass "$${REDIS_PASSWORD}"']
+    networks:
+      network:
+        ipv4_address: 172.31.0.103
+volumes:
+  mysql_data: {}
+  redis_data: {}
+networks:
+  network:
+    ipam:
+      driver: default
+      config:
+        - subnet: '172.31.0.0/16'

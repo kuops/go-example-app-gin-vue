@@ -1,0 +1,832 @@
+basePath: /
+definitions:
+  github.com_kuops_go-example-app_server_pkg_apis_menu_v1.Menu:
+    properties:
+      code:
+        type: string
+      comment:
+        type: string
+      created_at:
+        type: string
+      created_by:
+        type: integer
+      icon:
+        type: string
+      id:
+        type: integer
+      menu_type:
+        type: integer
+      name:
+        type: string
+      operate_type:
+        type: string
+      parent_id:
+        type: integer
+      sequence:
+        type: integer
+      status:
+        type: integer
+      updated_at:
+        type: string
+      updated_by:
+        type: integer
+      url:
+        type: string
+    type: object
+  github.com_kuops_go-example-app_server_pkg_apis_role_v1.Menu:
+    properties:
+      code:
+        type: string
+      comment:
+        type: string
+      created_at:
+        type: string
+      created_by:
+        type: integer
+      icon:
+        type: string
+      id:
+        type: integer
+      menu_type:
+        type: integer
+      name:
+        type: string
+      operate_type:
+        type: string
+      parent_id:
+        type: integer
+      sequence:
+        type: integer
+      status:
+        type: integer
+      updated_at:
+        type: string
+      updated_by:
+        type: integer
+      url:
+        type: string
+    type: object
+  request.ChangePassword:
+    properties:
+      newPassword:
+        example: "1234567"
+        type: string
+      password:
+        example: "123456"
+        type: string
+      username:
+        example: admin
+        type: string
+    type: object
+  request.CreateUser:
+    properties:
+      email:
+        type: string
+      header_img:
+        type: string
+      nick_name:
+        type: string
+      password:
+        type: string
+      phone_number:
+        type: string
+      real_name:
+        type: string
+      status:
+        type: integer
+      user_name:
+        type: string
+    type: object
+  request.DeleteMenus:
+    properties:
+      menu_ids:
+        items:
+          type: integer
+        type: array
+    type: object
+  request.DeleteRoles:
+    properties:
+      role_ids:
+        items:
+          type: integer
+        type: array
+    type: object
+  request.DeleteUsers:
+    properties:
+      user_ids:
+        items:
+          type: integer
+        type: array
+    type: object
+  request.Login:
+    properties:
+      password:
+        example: "123456"
+        type: string
+      username:
+        example: admin
+        type: string
+    type: object
+  request.MenuList:
+    properties:
+      key:
+        type: string
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      parent_id:
+        type: integer
+      sort:
+        type: string
+      type:
+        type: integer
+    type: object
+  request.RoleList:
+    properties:
+      key:
+        type: string
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      sort:
+        type: string
+      status:
+        type: integer
+    type: object
+  request.SetRoleMenus:
+    properties:
+      menu_ids:
+        items:
+          type: integer
+        type: array
+      role_id:
+        type: integer
+    type: object
+  request.SetUserRole:
+    properties:
+      role_ids:
+        items:
+          type: integer
+        type: array
+      user_id:
+        type: integer
+    type: object
+  request.UserList:
+    properties:
+      key:
+        type: string
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      sort:
+        type: string
+      status:
+        type: integer
+    type: object
+  v1.Role:
+    properties:
+      comment:
+        type: string
+      created_at:
+        type: string
+      created_by:
+        type: integer
+      id:
+        type: integer
+      name:
+        type: string
+      parent_id:
+        type: integer
+      sequence:
+        type: integer
+      updated_at:
+        type: string
+      updated_by:
+        type: integer
+    type: object
+  v1.User:
+    properties:
+      created_at:
+        type: string
+      created_by:
+        type: integer
+      email:
+        type: string
+      header_img:
+        type: string
+      id:
+        type: integer
+      nick_name:
+        type: string
+      phone_number:
+        type: string
+      real_name:
+        type: string
+      status:
+        type: integer
+      updated_at:
+        type: string
+      updated_by:
+        type: integer
+      user_name:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a sample server Petstore server.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Swagger Example API
+  version: "1.0"
+paths:
+  /api/v1/cluster/namespace/create:
+    post:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"获取成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 查看命名空间
+      tags:
+      - 命名空间
+  /api/v1/cluster/namespace/delete:
+    delete:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"获取成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 查看命名空间
+      tags:
+      - 命名空间
+  /api/v1/cluster/namespace/list:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"获取成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 查看命名空间
+      tags:
+      - 命名空间
+  /api/v1/menu/create:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/github.com_kuops_go-example-app_server_pkg_apis_menu_v1.Menu'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"添加菜单成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 添加菜单
+      tags:
+      - 菜单
+  /api/v1/menu/delete:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.DeleteMenus'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"删除用户成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 删除菜单
+      tags:
+      - 菜单
+  /api/v1/menu/detail:
+    get:
+      parameters:
+      - description: int valid
+        in: query
+        name: id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"获取用户详情成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 菜单详情
+      tags:
+      - 菜单
+  /api/v1/menu/list:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 页码, 每页大小
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.MenuList'
+      produces:
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"获取成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 分页菜单列表
+      tags:
+      - 菜单
+  /api/v1/menu/menubuttonlist:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: int valid
+        in: query
+        name: menucode
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"添加菜单成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 获取有权限操作的菜单
+      tags:
+      - 菜单
+  /api/v1/menu/update:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID, 父级ID, URL
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/github.com_kuops_go-example-app_server_pkg_apis_menu_v1.Menu'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"更新菜单信息成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 更新菜单信息
+      tags:
+      - 菜单
+  /api/v1/role/allrole:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"获取用户信息成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 获取所有角色
+      tags:
+      - 角色
+  /api/v1/role/create:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/github.com_kuops_go-example-app_server_pkg_apis_role_v1.Menu'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"添加成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 添加角色
+      tags:
+      - 角色
+  /api/v1/role/delete:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.DeleteRoles'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"删除角色成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 删除角色
+      tags:
+      - 角色
+  /api/v1/role/detail:
+    get:
+      parameters:
+      - description: int valid
+        in: query
+        name: id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"获取角色详情成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 角色详情
+      tags:
+      - 角色
+  /api/v1/role/list:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 页码, 每页大小
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.RoleList'
+      produces:
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"获取成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 分页角色列表
+      tags:
+      - 角色
+  /api/v1/role/rolemenuidlist:
+    get:
+      parameters:
+      - description: int valid
+        in: query
+        name: roleid
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"获取用户信息成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 获取角色下拉菜单
+      tags:
+      - 角色
+  /api/v1/role/setrole:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.SetRoleMenus'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"删除用户成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 设置角色菜单
+      tags:
+      - 角色
+  /api/v1/role/update:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID, 父级ID, URL
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/v1.Role'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"更新角色成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 更新角色
+      tags:
+      - 角色
+  /api/v1/user/changePassword:
+    post:
+      parameters:
+      - description: 用户名, 原密码, 新密码
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.ChangePassword'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"修改密码成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 修改密码
+      tags:
+      - 用户
+  /api/v1/user/create:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 用户名,密码
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreateUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"添加用户成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 添加用户
+      tags:
+      - 用户
+  /api/v1/user/delete:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.DeleteUsers'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"删除用户成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 删除用户
+      tags:
+      - 用户
+  /api/v1/user/detail:
+    get:
+      parameters:
+      - description: int valid
+        in: query
+        name: id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"获取用户详情成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 用户详情
+      tags:
+      - 用户
+  /api/v1/user/info:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"获取用户信息成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 用户信息
+      tags:
+      - 用户
+  /api/v1/user/list:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 页码, 每页大小
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.UserList'
+      produces:
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"获取成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 分页用户列表
+      tags:
+      - 用户
+  /api/v1/user/login:
+    post:
+      parameters:
+      - description: 用户名, 密码
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.Login'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"登陆成功"}'
+          schema:
+            type: string
+      summary: 用户登录
+      tags:
+      - 登录
+  /api/v1/user/logout:
+    post:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"退出成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 用户退出
+      tags:
+      - 用户
+  /api/v1/user/setrole:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 用户ID 角色ID
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.SetUserRole'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"分配角色成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 分配角色
+      tags:
+      - 用户
+  /api/v1/user/update:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID, 用户名, 昵称, 头像链接
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/v1.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"更新用户信息成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 更新用户信息
+      tags:
+      - 用户
+  /api/v1/user/usersroleidlist:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: int valid
+        in: query
+        name: id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{},"msg":"获取用户角色成功"}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 查看用户的角色
+      tags:
+      - 用户
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: x-token
+    type: apiKey
+swagger: "2.0"
